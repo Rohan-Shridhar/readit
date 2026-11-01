@@ -1,0 +1,179 @@
+
+/* =========================
+   Global Styles
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 320px;
+    background: #0f1117;
+    color: #f1f5f9;
+    font-family: Arial, sans-serif;
+}
+
+.popup-container {
+    padding: 20px;
+}
+
+
+/* =========================
+   Header
+========================= */
+
+.header {
+    margin-bottom: 28px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 12px;
+    background: #2563eb;
+
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.header h1 {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.header p {
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* =========================
+   Selection Section
+========================= */
+
+.selection-section {
+    margin-bottom: 22px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.status-badge {
+    padding: 5px 9px;
+    border-radius: 20px;
+
+    background: #252a35;
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+.status-badge.selected {
+    background: #123c2b;
+    color: #4ade80;
+}
+
+.selection-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 15px;
+
+    background: #191e29;
+    border: 1px solid #293142;
+    border-radius: 10px;
+}
+
+.status-icon {
+    font-size: 25px;
+    color: #60a5fa;
+}
+
+.status-content h2 {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-content p {
+    margin-top: 5px;
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* =========================
+   Action Button
+========================= */
+
+.action-section {
+    margin-bottom: 24px;
+}
+
+.primary-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    width: 100%;
+    padding: 13px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: #2563eb;
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.primary-button:hover {
+    background: #1d4ed8;
+}
+
+.primary-button:active {
+    transform: scale(0.98);
+}
+
+
+/* =========================
+   Footer
+========================= */
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+
+    padding-top: 14px;
+    border-top: 1px solid #293142;
+
+    color: #64748b;
+    font-size: 10px;
+}
