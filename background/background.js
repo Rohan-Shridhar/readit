@@ -1,20 +1,19 @@
 /**
- * readit — Background Service Worker
- * Manages extension lifecycle, tab messaging, and state coordination.
+ * readit — Background Service Worker (v0.4.0)
+ * Extension lifecycle, tab routing, and graceful error boundary.
  */
 
 chrome.runtime.onInstalled.addListener((details) => {
-    console.log("Readit extension installed/updated:", details.reason);
+    console.log("Readit extension ready:", details.reason);
 });
 
 // Forward messages to the active tab's content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // If the message is already from a content script (sender has tab), don't loop it back
+    // Prevent message reflection if sent from a content script
     if (sender.tab) {
         return false;
     }
 
-    // Messages destined for the active tab content script
     const contentScriptActionTypes = [
         "START_SELECTION",
         "GET_STATUS",
@@ -24,6 +23,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         "STOP_READING",
         "SET_SPEED",
         "SET_THEME",
+        "SET_AUTOSCROLL",
         "NAVIGATE_WORD"
     ];
 
@@ -32,15 +32,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             .then(async (tabs) => {
                 const activeTab = tabs[0];
                 if (!activeTab || !activeTab.id) {
-                    sendResponse({ success: false, message: "No active tab found" });
+                    sendResponse({ success: false, message: "No active webpage tab found." });
                     return;
                 }
 
-                // Check for unsupported system URLs
-                if (!activeTab.url || activeTab.url.startsWith("chrome://") || activeTab.url.startsWith("chrome-extension://") || activeTab.url.startsWith("edge://") || activeTab.url.startsWith("about:")) {
+                // Check for unsupported system or webstore URLs
+                const url = activeTab.url || "";
+                if (
+                    url.startsWith("chrome://") ||
+                    url.startsWith("chrome-extension://") ||
+                    url.startsWith("edge://") ||
+                    url.startsWith("about:") ||
+                    url.includes("chromewebstore.google.com") ||
+                    url.includes("chrome.google.com/webstore")
+                ) {
                     sendResponse({
                         success: false,
-                        message: "Readit is not supported on browser system pages."
+                        isRestrictedPage: true,
+                        message: "Chrome extensions cannot run on browser system pages or the Web Store."
                     });
                     return;
                 }
@@ -49,10 +58,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                     const response = await chrome.tabs.sendMessage(activeTab.id, message);
                     sendResponse(response);
                 } catch (error) {
-                    console.warn("Readit: Failed to communicate with content script:", error.message);
+                    console.warn("Readit: Failed to reach content script:", error.message);
                     sendResponse({
                         success: false,
-                        message: "Please refresh the page to use Readit on this tab."
+                        needsReload: true,
+                        message: "Please reload this webpage to activate Readit."
                     });
                 }
             })
@@ -60,6 +70,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 sendResponse({ success: false, message: err.message });
             });
 
-        return true; // Keep message channel open for async response
+        return true;
     }
 });

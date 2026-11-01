@@ -1,20 +1,20 @@
 /**
- * readit — Content Script
- * Handles selection detection, UI feedback, and communicates with the popup/engine.
+ * readit — Content Script (v0.4.0)
+ * Selection detection, keyboard navigation, state coordination, and runtime error handling.
  */
 
 (function () {
     'use strict';
-
-    console.log("Readit: Content script loaded.");
 
     const engine = new (window.ReaditReadingEngine || Object)();
     let isSelectionMode = false;
     let savedRange = null;
     let toastTimeout = null;
 
-    // Toast UI
+    // Toast Notification UI
     function showToast(title, subtitle = '', badge = '') {
+        if (!document.body) return;
+
         let toast = document.getElementById('readit-toast-element');
         if (!toast) {
             toast = document.createElement('div');
@@ -40,81 +40,97 @@
 
         if (toastTimeout) clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => {
-            toast.classList.remove('readit-toast-visible');
-        }, 3500);
+            if (toast) toast.classList.remove('readit-toast-visible');
+        }, 3200);
+    }
+
+    // Helper to send messages safely without throwing unhandled exceptions
+    function notifyPopup(message) {
+        try {
+            chrome.runtime.sendMessage(message).catch(() => {});
+        } catch (e) {}
     }
 
     // Enter Selection Mode
     function enableSelectionMode() {
         isSelectionMode = true;
         document.body.classList.add('readit-selection-mode');
-        showToast("Selection Mode Active", "Highlight any text on this page to read.", "Active");
+        showToast("Selection Mode Active", "Select any text passage on this page to begin.", "Active");
 
         const onMouseUp = () => {
             const selection = window.getSelection();
             if (selection && !selection.isCollapsed && selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const selectedText = range.toString().trim();
+                try {
+                    const range = selection.getRangeAt(0);
+                    const selectedText = range.toString().trim();
 
-                if (selectedText.length > 0) {
-                    savedRange = range.cloneRange();
-                    const words = engine.processRange(savedRange);
+                    if (selectedText.length > 0) {
+                        savedRange = range.cloneRange();
+                        const words = engine.processRange(savedRange);
 
-                    if (words.length > 0) {
-                        isSelectionMode = false;
-                        document.body.classList.remove('readit-selection-mode');
-                        document.removeEventListener('mouseup', onMouseUp);
+                        if (words.length > 0) {
+                            isSelectionMode = false;
+                            document.body.classList.remove('readit-selection-mode');
+                            document.removeEventListener('mouseup', onMouseUp);
 
-                        showToast(
-                            "Text Selected",
-                            "Open readit popup or press Space to start reading.",
-                            `${words.length} words`
-                        );
+                            showToast(
+                                "Text Selected",
+                                "Open popup or press Space to begin reading.",
+                                `${words.length} words`
+                            );
 
-                        // Broadcast selection update
-                        try {
-                            chrome.runtime.sendMessage({
+                            notifyPopup({
                                 type: "SELECTION_UPDATED",
                                 wordCount: words.length,
                                 textPreview: selectedText.substring(0, 100)
-                            }).catch(() => {});
-                        } catch (e) {}
+                            });
+                        }
                     }
+                } catch (err) {
+                    console.warn("Readit: Error capturing selection", err);
                 }
             }
         };
 
-        // Listen for mouseup once user selects text
         document.addEventListener('mouseup', onMouseUp);
     }
 
-    // Engine callbacks
+    // Engine Callbacks
     engine.onProgress = (progress) => {
-        try {
-            chrome.runtime.sendMessage({
-                type: "READING_PROGRESS",
-                ...progress
-            }).catch(() => {});
-        } catch (e) {}
+        notifyPopup({
+            type: "READING_PROGRESS",
+            ...progress
+        });
     };
 
     engine.onComplete = () => {
-        showToast("Reading Complete", "Finished reading the selected text.", "Done");
-        try {
-            chrome.runtime.sendMessage({ type: "READING_COMPLETED" }).catch(() => {});
-        } catch (e) {}
+        showToast("Reading Complete", "Finished reading the selected passage.", "Done");
+        notifyPopup({ type: "READING_COMPLETED" });
     };
 
-    // Keyboard Shortcuts
+    engine.onError = (msg) => {
+        showToast("Notice", msg, "Alert");
+    };
+
+    // Keyboard Shortcuts (Space, ESC, Left/Right Arrows)
     window.addEventListener('keydown', (e) => {
-        // ESC cancels reading or selection mode
+        // Skip hotkeys if user is editing in an input, textarea, or contentEditable element
+        const target = e.target;
+        if (target && (
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable
+        )) {
+            return;
+        }
+
+        // ESC: Stop reading or cancel selection mode
         if (e.key === 'Escape') {
             if (engine.isPlaying || engine.isPaused) {
                 engine.stop();
-                showToast("Reading Stopped", "Webpage restored to original appearance.");
-                try {
-                    chrome.runtime.sendMessage({ type: "READING_STOPPED" }).catch(() => {});
-                } catch (err) {}
+                showToast("Reading Stopped", "Webpage restored.");
+                notifyPopup({ type: "READING_STOPPED" });
                 e.preventDefault();
             } else if (isSelectionMode) {
                 isSelectionMode = false;
@@ -124,20 +140,22 @@
             }
         }
 
-        // Spacebar to toggle pause/resume or start reading if text is selected
-        if (e.code === 'Space' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        // Spacebar: Toggle Pause/Resume or Start Reading
+        if (e.code === 'Space') {
             if (engine.isPlaying) {
                 engine.togglePause();
                 showToast(engine.isPaused ? "Reading Paused" : "Reading Resumed");
+                notifyPopup({ type: engine.isPaused ? "READING_PAUSED" : "READING_RESUMED" });
                 e.preventDefault();
             } else if (engine.words.length > 0 && !isSelectionMode) {
                 engine.start();
                 showToast("Reading Started", `${engine.words.length} words`, "Live");
+                notifyPopup({ type: "READING_STARTED" });
                 e.preventDefault();
             }
         }
 
-        // Arrow navigation when reading or paused
+        // Arrow Keys: Step through words
         if (engine.isPlaying || engine.isPaused) {
             if (e.key === 'ArrowRight') {
                 engine.nextWord();
@@ -149,22 +167,30 @@
         }
     });
 
-    // Message listener for popup & background requests
+    // Cleanup before page navigation or reload
+    window.addEventListener('beforeunload', () => {
+        if (engine.isPlaying || engine.isPaused) {
+            engine.stop();
+        }
+    });
+
+    // Message listener
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         switch (message.type) {
             case "START_SELECTION":
                 enableSelectionMode();
-                sendResponse({ success: true, message: "Selection mode activated" });
+                sendResponse({ success: true, message: "Selection mode active" });
                 break;
 
             case "GET_STATUS": {
-                // If user selected text directly with mouse without clicking Select Text first
                 if (!savedRange || engine.words.length === 0) {
-                    const sel = window.getSelection();
-                    if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
-                        savedRange = sel.getRangeAt(0).cloneRange();
-                        engine.processRange(savedRange);
-                    }
+                    try {
+                        const sel = window.getSelection();
+                        if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+                            savedRange = sel.getRangeAt(0).cloneRange();
+                            engine.processRange(savedRange);
+                        }
+                    } catch (e) {}
                 }
 
                 let state = "idle";
@@ -183,6 +209,7 @@
                     currentIndex: engine.currentIndex,
                     speedWpm: engine.speedWpm,
                     colorTheme: engine.colorTheme,
+                    autoScroll: engine.autoScroll,
                     textPreview: engine.words.length > 0
                         ? engine.words.slice(0, 15).map(w => w.word).join(' ') + (engine.words.length > 15 ? '...' : '')
                         : ''
@@ -231,6 +258,11 @@
                 }
                 break;
 
+            case "SET_AUTOSCROLL":
+                engine.setAutoScroll(message.autoScroll);
+                sendResponse({ success: true, autoScroll: engine.autoScroll });
+                break;
+
             case "NAVIGATE_WORD":
                 if (message.direction === 'next') {
                     engine.nextWord();
@@ -241,7 +273,7 @@
                 break;
 
             default:
-                sendResponse({ success: false, message: "Unknown message type" });
+                sendResponse({ success: false, message: "Unrecognized command" });
         }
         return true;
     });
