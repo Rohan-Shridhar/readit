@@ -1,0 +1,1 @@
+console.log("Reading Assistant content script loaded!");
