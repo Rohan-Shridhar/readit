@@ -1,15 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>readit</title>
-
     <link rel="stylesheet" href="popup.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="popup.js" defer></script>
 </head>
 
@@ -17,22 +13,39 @@
     <main class="popup-container">
         <header class="header">
             <div class="brand">
-                <img class="brand-icon" src="../icons/icon64.png" alt="">
-                <h1>readit</h1>
+                <img class="brand-icon" src="../icons/icon64.png" alt="readit logo">
+                <div class="brand-info">
+                    <h1>readit</h1>
+                    <span class="badge" id="statusBadge">Ready</span>
+                </div>
             </div>
         </header>
 
+        <!-- Selection preview banner -->
+        <section id="selectionInfo" class="selection-info hidden">
+            <div class="info-row">
+                <span class="info-label">Selected:</span>
+                <span id="wordCountLabel" class="info-value">0 words</span>
+            </div>
+            <p id="previewSnippet" class="preview-snippet"></p>
+        </section>
+
+        <!-- Main Action Buttons -->
         <section class="action-section">
             <button id="selectBtn" class="primary-button">
-                <i class="fa-solid fa-plus" id="buttonIcon" aria-hidden="true"></i>
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
                 <span id="buttonText">Select Text</span>
             </button>
         </section>
 
         <footer class="footer">
             <span>readit</span>
-            <span>v0.1.0</span>
+            <span id="versionLabel">v0.2.0</span>
         </footer>
     </main>
 </body>
+
 </html>
