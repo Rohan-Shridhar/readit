@@ -226,7 +226,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.3.1 — Start Reading
 
-- [ ] **Objective:** Activate reading mode from the extension popup.
+- [x] **Objective:** Activate reading mode from the extension popup.
 - **Prerequisites:** Version 0.2.0.
 - **Part:** Frontend / Extension Communication.
 - **Motive:** Core Functionality.
@@ -244,7 +244,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.3.2 — Stop Reading with ESC
 
-- [ ] **Objective:** Allow users to stop reading immediately using the Escape key.
+- [x] **Objective:** Allow users to stop reading immediately using the Escape key.
 - **Prerequisites:** Step 0.3.1.
 - **Part:** Webpage Interaction.
 - **Motive:** Accessibility / User Control.
@@ -264,7 +264,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.3.3 — Reading Speed
 
-- [ ] **Objective:** Allow users to control the speed of word transitions.
+- [x] **Objective:** Allow users to control the speed of word transitions.
 - **Prerequisites:** Step 0.3.1.
 - **Part:** Frontend / Reading Engine.
 - **Motive:** Customization.
@@ -284,7 +284,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.3.4 — Pause and Resume
 
-- [ ] **Objective:** Allow users to temporarily pause and resume reading.
+- [x] **Objective:** Allow users to temporarily pause and resume reading.
 - **Prerequisites:** Step 0.3.1.
 - **Part:** Frontend / Reading Engine.
 - **Motive:** User Control.
@@ -302,7 +302,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.3.5 — Reading Progress
 
-- [ ] **Objective:** Display the user's reading progress.
+- [x] **Objective:** Display the user's reading progress.
 - **Prerequisites:** Step 0.3.4.
 - **Part:** Frontend.
 - **Motive:** User Experience.
@@ -531,7 +531,7 @@ Every version follows the development lifecycle:
 |---|---|---|
 | v0.1.0 | Foundation | Planned |
 | v0.2.0 | Text Selection & Reading Engine | Completed |
-| v0.3.0 | Reading Controls | Planned |
+| v0.3.0 | Reading Controls | Completed |
 | v0.4.0 | Customization & Stability | Planned |
 | v1.0.0 | Stable Release | Planned |
 

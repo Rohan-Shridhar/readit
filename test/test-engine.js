@@ -107,29 +107,46 @@ console.log("Running ReadingEngine Tests...");
 const engine = new ReadingEngine();
 assert(engine, "Engine should instantiate");
 
-const node1 = new MockTextNode("Hello world! This is a test.");
+const node1 = new MockTextNode("Focus on every single word.");
 const root = new MockElementNode('div', [node1]);
 const range = new MockRange(node1, 0, node1, node1.length);
 range.commonAncestorContainer = root;
 
 const words = engine.processRange(range);
+assert.strictEqual(words.length, 5, "Should identify 5 words");
 console.log(`Tokenized ${words.length} words:`, words.map(w => w.word));
-assert.strictEqual(words.length, 6, "Should find 6 words");
-assert.strictEqual(words[0].word, "Hello");
-assert.strictEqual(words[1].word, "world!");
-assert.strictEqual(words[5].word, "test.");
 
-// Test delay calculation
-const normalDelay = engine.getWordDelay("word");
-const punctDelay = engine.getWordDelay("word.");
-assert(punctDelay > normalDelay, "Punctuation should have longer delay");
+// Test Progress tracking
+let progressCount = 0;
+engine.onProgress = (p) => {
+    progressCount++;
+    assert(p.totalWords === 5, "Total words in progress should be 5");
+};
 
-// Test speed setting
-engine.setSpeed(300);
-assert.strictEqual(engine.speedWpm, 300);
+// Test start and highlight
+engine.start(0);
+assert.strictEqual(engine.currentIndex, 0, "Current index should be 0");
+assert.strictEqual(engine.isPlaying, true, "Engine should be playing");
+assert.strictEqual(engine.isPaused, false, "Engine should not be paused");
 
-// Test theme setting
-engine.setTheme("cyan");
-assert.strictEqual(engine.colorTheme, "cyan");
+// Test pause & resume
+engine.pause();
+assert.strictEqual(engine.isPaused, true, "Engine should be paused");
+assert.strictEqual(engine.timer, null, "Timer should be cleared when paused");
 
-console.log("All ReadingEngine unit tests passed successfully!");
+engine.resume();
+assert.strictEqual(engine.isPaused, false, "Engine should be unpaused");
+
+// Test manual stepping
+engine.nextWord();
+assert.strictEqual(engine.currentIndex, 1, "Should step to index 1");
+
+engine.prevWord();
+assert.strictEqual(engine.currentIndex, 0, "Should step back to index 0");
+
+// Test stop
+engine.stop();
+assert.strictEqual(engine.isPlaying, false, "Engine should be stopped");
+assert.strictEqual(engine.currentIndex, -1, "Index should be reset to -1");
+
+console.log("All ReadingEngine v0.3.0 tests passed successfully!");

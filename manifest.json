@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "readit",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Improve reading experience by word-by-word highlighting on webpages",
     "icons": {
         "16": "icons/icon16.png",
