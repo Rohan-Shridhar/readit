@@ -1,7 +1,7 @@
 /**
- * readit — Popup Controller (v0.4.0)
+ * readit — Popup Controller (v1.0.0 Stable)
  * Manages user interactions, reading controls, speed, theme customization,
- * auto-scroll preferences, and graceful error handling.
+ * auto-scroll preferences, selection clearance, and graceful error handling.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainActionBtn = document.getElementById("mainActionBtn");
     const mainActionText = document.getElementById("mainActionText");
     const mainActionIcon = document.getElementById("mainActionIcon");
+    const clearSelectionBtn = document.getElementById("clearSelectionBtn");
 
     const readingControls = document.getElementById("readingControls");
     const prevBtn = document.getElementById("prevBtn");
@@ -119,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             progressStatusLabel.textContent = "Reading";
 
             initialActions.classList.add("hidden");
+            clearSelectionBtn.classList.add("hidden");
             readingControls.classList.remove("hidden");
             selectionInfo.classList.remove("hidden");
 
@@ -138,6 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
             progressStatusLabel.textContent = "Paused";
 
             initialActions.classList.add("hidden");
+            clearSelectionBtn.classList.add("hidden");
             readingControls.classList.remove("hidden");
             selectionInfo.classList.remove("hidden");
 
@@ -156,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
             progressStatusLabel.textContent = "Ready";
 
             initialActions.classList.remove("hidden");
+            clearSelectionBtn.classList.remove("hidden");
             readingControls.classList.add("hidden");
             selectionInfo.classList.remove("hidden");
 
@@ -175,6 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
             statusBadge.className = "badge";
 
             initialActions.classList.remove("hidden");
+            clearSelectionBtn.classList.add("hidden");
             readingControls.classList.add("hidden");
             selectionInfo.classList.add("hidden");
 
@@ -247,6 +252,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
+    });
+
+    // Clear selection
+    clearSelectionBtn.addEventListener("click", () => {
+        chrome.runtime.sendMessage({ type: "STOP_READING" }, () => {
+            updateStateUI("idle");
+        });
     });
 
     // Reading playback controls

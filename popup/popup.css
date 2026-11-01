@@ -169,12 +169,18 @@ body {
     display: none;
 }
 
+.action-buttons-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .primary-button {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    width: 100%;
+    flex: 1;
     min-height: 42px;
     padding: 10px 16px;
     border: 0;
@@ -202,6 +208,30 @@ body {
 
 .primary-button.btn-read:hover {
     background: #15803d;
+}
+
+.icon-secondary-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.icon-secondary-button:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.icon-secondary-button.hidden {
+    display: none;
 }
 
 /* Active Reading Controls */
