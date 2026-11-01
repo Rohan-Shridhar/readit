@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>readit — Make every word count</title>
+<meta name="description" content="Find your focus with readit, an open-source browser extension that guides you through any webpage one word at a time.">
+<link rel="icon" href="icons/icon16.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<style>
+:root{
+  --canopy:#0f0f0f; --understory:#212121; --moss:#272727; --fern:#f1f1f1; --leaf:#3f3f3f;
+  --mist:#f1f1f1; --bark:#aaa; --beak:#ff0033; --macaw:#ff0033; --hl:#ffe066; --hl-text:#111;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:Figtree,system-ui,sans-serif;background:var(--canopy);color:var(--mist);line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--beak);outline-offset:2px}
+.photo{background-color:var(--moss);background-size:cover;background-position:center}
+
+/* top bar */
+.top{position:fixed;inset:0 0 auto 0;height:var(--bar);z-index:50;display:flex;align-items:center;gap:16px;padding:0 16px;background:rgba(15,15,15,.96);backdrop-filter:blur(8px)}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center}
+.icon-btn:hover{background:var(--moss)}
+.icon-btn .fa-solid{font-size:18px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-.03em}
+.logo img{width:30px;height:30px}
+.pill{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:18px;font-weight:600;font-size:14px;white-space:nowrap}
+.pill.red{background:var(--macaw);color:#fff}
+.pill.red:hover{background:#cc0029}
+.pill.ghost{background:var(--moss)}
+.pill.ghost:hover{background:#3f3f3f}
+
+
+
+/* player */
+.watch{display:grid;grid-template-columns:minmax(0,1fr);max-width:1180px}
+.player{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+  background-image:linear-gradient(135deg,#272727,#0f0f0f)}
+.stage{position:absolute;inset:0 0 56px;display:grid;place-items:center;padding:6%}
+.passage{max-width:760px;font-size:clamp(17px,2.5vw,30px);font-weight:600;line-height:1.7;color:#f1f1f1;text-wrap:pretty}
+.passage span{padding:1px 3px;border-radius:5px;transition:background .12s,color .12s}
+.passage span.now{background:var(--hl);color:var(--hl-text)}
+.passage span.done{color:#aaa}
+.controls{position:absolute;left:0;right:0;bottom:0;padding:0 14px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65))}
+.prog{height:4px;background:rgba(255,255,255,.28);border-radius:2px;margin:12px 0 4px;cursor:pointer;position:relative}
+.prog i{position:absolute;inset:0 auto 0 0;width:0;background:var(--macaw);border-radius:2px}
+.prog i::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;border-radius:50%;background:var(--macaw)}
+.ctl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.ctl .grow{flex:1}
+.ctl input[type=range]{width:110px;accent-color:var(--beak)}
+.dots{display:flex;gap:6px;margin-left:8px}
+.dot{width:18px;height:18px;border-radius:50%;border:2px solid transparent}
+.dot.on{border-color:#fff}
+.hint{position:absolute;top:12px;left:14px;font-size:12px;font-weight:600;background:rgba(0,0,0,.5);padding:3px 10px;border-radius:12px}
+
+.title{font-size:clamp(20px,2.4vw,26px);font-weight:800;letter-spacing:-.02em;margin:14px 0 10px}
+h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:44px 0 16px}
+h2 small{font-size:14px;font-weight:500;color:var(--bark);margin-left:8px}
+
+/* install */
+.steps{display:grid;gap:14px;max-width:900px}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px;border-radius:12px;background:var(--understory)}
+.step-icon{width:44px;height:44px;border-radius:50%;background:var(--leaf);color:#fff;font-size:18px;display:grid;place-items:center}
+.step h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.step p{font-size:14px;color:var(--bark)}
+.step p b{color:var(--mist)}
+.code{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 8px 8px 14px;border-radius:8px;background:var(--canopy);border:1px solid #383838;font:500 13px ui-monospace,Menlo,Consolas,monospace;overflow-x:auto}
+.code code{flex:1;white-space:nowrap}
+.copy{flex:none;height:28px;padding:0 12px;border-radius:14px;background:var(--moss);font:600 12px Figtree,sans-serif}
+.copy:hover{background:#3f3f3f}
+.note{margin-top:14px;font-size:13px;color:var(--bark);max-width:900px}
+
+/* grid cards */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 16px}
+.card .thumb{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;transition:border-radius .15s}
+.card:hover .thumb{border-radius:4px}
+.card .thumb::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.05),rgba(0,0,0,.5))}
+.card .feature-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(64px,8vw,112px);color:rgba(255,255,255,.14)}
+.card .thumb em{position:relative;font-style:normal;font-size:12px;font-weight:700;background:rgba(0,0,0,.78);padding:2px 6px;border-radius:4px}
+.card .thumb strong{position:absolute;left:14px;top:12px;font-size:26px;font-weight:800;letter-spacing:-.03em;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.card .meta{margin-top:12px}
+.card h3{font-size:15px;font-weight:700;line-height:1.35}
+.card p{font-size:13px;color:var(--bark);margin-top:2px}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid #383838;font-size:13px;color:var(--bark);display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+footer a:hover{color:var(--mist);text-decoration:underline}
+
+@media (max-width:900px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .watch{grid-template-columns:1fr}
+  .top-nav{display:none}
+  main{padding-inline:20px}
+  .ctl input[type=range],.hide-s{display:none}
+  .steps{grid-template-columns:1fr}
+}
+@media (max-width:560px){.grid{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Original open-source festival-inspired landing page */
+html{scroll-padding-top:88px}
+body{background:var(--canopy);background-image:radial-gradient(ellipse at 50% 0,rgba(255,0,51,.10),transparent 42%)}
+.top{position:sticky;height:76px;padding:0 clamp(18px,5vw,72px);justify-content:space-between;border-bottom:1px solid #292929}
+.top-nav{display:flex;align-items:center;gap:28px;color:var(--bark);font-size:14px;font-weight:600}
+.top-nav a:hover,footer a:hover{color:var(--mist)}
+.logo{font-size:21px}
+.top-actions{display:flex;gap:10px}
+main{max-width:1320px;margin:0 auto;padding:0 clamp(18px,5vw,72px) 64px}
+.watch{max-width:none;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(32px,6vw,84px);align-items:center;padding:clamp(62px,10vw,128px) 0 86px}
+.hero-copy{max-width:570px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid #48403b;border-radius:999px;color:var(--mist);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.eyebrow i{color:var(--beak)}
+.title{font-size:clamp(46px,6.6vw,82px);font-weight:800;line-height:.98;letter-spacing:-.065em;margin:24px 0}
+.title span{color:var(--beak)}
+.hero-copy>p{max-width:500px;color:#c5c5c5;font-size:clamp(16px,1.6vw,19px);line-height:1.75}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 32px}
+.hero-actions .pill{height:46px;padding:0 20px}
+.hero-points{display:flex;gap:24px;flex-wrap:wrap;color:var(--bark);font-size:13px}
+.hero-points i{color:var(--beak);margin-right:6px}
+.demo-wrap{padding:10px;border:1px solid #3a3a3a;border-radius:18px;background:linear-gradient(145deg,#242424,#151515);box-shadow:0 28px 90px rgba(0,0,0,.45)}
+.demo-head{display:flex;justify-content:space-between;align-items:center;padding:7px 8px 13px;font-size:13px;font-weight:700}
+.demo-head i{color:var(--beak);margin-right:7px}
+.demo-head small{color:var(--bark);font-weight:500}
+.player{aspect-ratio:16/10;border-radius:12px;background-image:radial-gradient(ellipse at 50% 35%,#343434,#141414 75%)}
+.stage{inset:0 0 54px}
+.passage{font-size:clamp(17px,2vw,25px)}
+.controls{padding-bottom:10px}
+h2{font-size:clamp(28px,4vw,40px);margin:0 0 10px;letter-spacing:-.04em}
+h2 small{display:block;margin:8px 0 26px;font-size:15px;letter-spacing:0}
+.section-intro{max-width:680px;margin-bottom:32px;color:var(--bark);font-size:16px}
+.feature-section,.install-section{padding:72px 0;border-top:1px solid #303030}
+.grid{gap:16px}
+.card .thumb{background:linear-gradient(145deg,#292929,#171717);border:1px solid #363636}
+.card .thumb::before{background:radial-gradient(circle at 50% 55%,rgba(255,0,51,.17),transparent 65%)}
+.card .feature-icon{color:rgba(255,255,255,.2)}
+.card .meta{padding:0 3px}
+.card p{line-height:1.6}
+.steps{max-width:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.step{min-height:130px;border:1px solid #333;background:#1a1a1a}
+.step:last-child{grid-column:1/-1}
+.step-icon{border-radius:12px;background:#302327;color:#ff526f}
+.note{margin-top:18px}
+.demo-keys{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:12px 4px 2px;color:var(--bark);font-size:12px}
+.demo-keys>i{color:var(--beak);margin-right:4px}
+.demo-keys kbd{padding:2px 6px;border:1px solid #444;border-radius:4px;background:#252525;color:var(--mist);font:600 11px Figtree,sans-serif}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;padding:32px;border:1px solid #483137;border-radius:18px;background:linear-gradient(110deg,#26191c,#1c1c1c)}
+.cta h2{margin:0 0 8px;font-size:clamp(25px,3vw,34px)}
+.cta p{color:var(--bark)}
+footer{margin-top:64px;border-color:#383838}
+@media(max-width:900px){.watch{grid-template-columns:1fr;padding:64px 0}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.top-nav{display:none}}
+@media(max-width:560px){.top{height:64px;padding-inline:16px}.top .pill.ghost{display:none}.watch{padding:48px 0 60px}.title{font-size:48px}.grid,.steps{grid-template-columns:1fr}.step:last-child{grid-column:auto}.feature-section,.install-section{padding:52px 0}.demo-head small{display:none}.cta{padding:24px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="logo" href="#top"><img src="icons/icon48.png" alt="">readit</a>
+  <nav class="top-nav" aria-label="Main navigation">
+    <a href="#features">Why readit</a><a href="#install">Get started</a>
+  </nav>
+  <div class="top-actions">
+    <a class="pill ghost" href="https://github.com/Rohan-Shridhar/readit" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i> GitHub</a>
+    <a class="pill red" href="#install">Get readit <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="watch">
+    <div class="hero-copy">
+      <span class="eyebrow"><i class="fa-solid fa-sparkles" aria-hidden="true"></i> Open source reading, reimagined</span>
+      <h1 class="title">Make every word <span>count.</span></h1>
+      <p>Find your focus and keep your place. readit guides you through any webpage one word at a time, at a pace that feels right.</p>
+      <div class="hero-actions"><a class="pill red" href="#demo"><i class="fa-solid fa-play" aria-hidden="true"></i> Try the live demo</a><a class="pill ghost" href="https://github.com/Rohan-Shridhar/readit/archive/refs/heads/main.zip"><i class="fa-solid fa-download" aria-hidden="true"></i> Download ZIP</a></div>
+      <div class="hero-points"><span><i class="fa-solid fa-gauge-high"></i> 100–700 WPM</span><span><i class="fa-solid fa-shield-halved"></i> Private by design</span><span><i class="fa-brands fa-chrome"></i> Chromium browsers</span></div>
+    </div>
+    <div class="demo-wrap" id="demo">
+      <div class="demo-head"><span><i class="fa-solid fa-circle-play" aria-hidden="true"></i> Interactive demo</span><small>Click any word to jump</small></div>
+      <div class="player" id="player" aria-label="Interactive readit demo">
+        <div class="stage"><p class="passage" id="passage"></p></div>
+        <div class="controls">
+          <div class="prog" id="prog"><i id="bar"></i></div>
+          <div class="ctl">
+            <button class="icon-btn" id="play" aria-label="Play or pause"><i class="fa-solid fa-play" id="playIco" aria-hidden="true"></i></button>
+            <span id="wpmOut">250 WPM</span>
+            <input type="range" id="wpm" min="100" max="700" step="25" value="250" aria-label="Words per minute">
+            <span class="grow"></span><span class="hide-s">Color</span>
+            <div class="dots" id="dots">
+              <button class="dot on" data-bg="#ffe066" data-fg="#111111" style="background:#ffe066" aria-label="Sun Yellow"></button>
+              <button class="dot" data-bg="#86efac" data-fg="#064e3b" style="background:#86efac" aria-label="Emerald Green"></button>
+              <button class="dot" data-bg="#7dd3fc" data-fg="#082f49" style="background:#7dd3fc" aria-label="Electric Cyan"></button>
+              <button class="dot" data-bg="#fda4af" data-fg="#4c0519" style="background:#fda4af" aria-label="Sunset Coral"></button>
+              <button class="dot" data-bg="#d8b4fe" data-fg="#3b0764" style="background:#d8b4fe" aria-label="Lavender Calm"></button>
+            </div>
+          </div>
+          <p class="demo-keys"><i class="fa-solid fa-keyboard" aria-hidden="true"></i> <kbd>Space</kbd> Play / pause <span>·</span> <kbd>←</kbd> Previous word <span>·</span> <kbd>→</kbd> Next word <span>·</span> <kbd>Esc</kbd> Stop and reset</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature-section" id="features">
+    <h2>Reading, in your rhythm.</h2><p class="section-intro">Simple tools that help you stay focused without changing the page you’re reading.</p>
+    <div class="grid" id="cards">
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-highlighter" aria-hidden="true"></i><strong>Word by word</strong><em>0 DOM edits</em></div><div class="meta"><h3>Highlights without touching the page</h3><p>Ranges and the CSS Custom Highlight API keep layout, links and formatting intact.</p></div></article>
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-gauge-high" aria-hidden="true"></i><strong>100 to 700</strong><em>WPM</em></div><div class="meta"><h3>Speed you control, live</h3><p>Slider or presets. Change pace mid-read and it updates on the next word.</p></div></article>
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-clock" aria-hidden="true"></i><strong>Natural cadence</strong><em>1.5x pause</em></div><div class="meta"><h3>Pauses where you'd pause</h3><p>Longer holds on sentence ends, commas and long words so it doesn't feel robotic.</p></div></article>
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-palette" aria-hidden="true"></i><strong>5 themes</strong><em>Readable anywhere</em></div><div class="meta"><h3>Highlight colors that hold up</h3><p>Yellow, green, cyan, coral and lavender, each with matched text contrast.</p></div></article>
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-arrows-up-down" aria-hidden="true"></i><strong>Auto-scroll</strong><em>Per line</em></div><div class="meta"><h3>Stays in view, no jitter</h3><p>Scrolls only when the word leaves a comfort zone, throttled to one move per line.</p></div></article>
+      <article class="card"><div class="thumb photo"><i class="feature-icon fa-solid fa-shield-halved" aria-hidden="true"></i><strong>Private</strong><em>0 network calls</em></div><div class="meta"><h3>No tracking, no accounts</h3><p>Only <b>activeTab</b> and <b>storage</b> permissions. Settings stay in your browser.</p></div></article>
+    </div>
+  </section>
+
+  <section class="install-section" id="install">
+  <h2>Get started in minutes.</h2><p class="section-intro">Install readit in any Chromium browser. No store account needed.</p>
+  <div class="steps">
+    <div class="step"><i class="step-icon fa-brands fa-github" aria-hidden="true"></i><div>
+      <h3>Clone the repository</h3>
+      <p>Needs <b>git</b>. No git? Use <b>Download ZIP</b> above and unzip it instead.</p>
+      <div class="code"><code>git clone https://github.com/Rohan-Shridhar/readit.git</code><button class="copy">Copy</button></div>
+    </div></div>
+    <div class="step"><i class="step-icon fa-solid fa-puzzle-piece" aria-hidden="true"></i><div>
+      <h3>Open the extensions page</h3>
+      <p>Use Chrome, Edge, Brave or any Chromium browser. Paste this into the address bar (links to <b>chrome://</b> pages are blocked, so copy it).</p>
+      <div class="code"><code>chrome://extensions</code><button class="copy">Copy</button></div>
+    </div></div>
+    <div class="step"><i class="step-icon fa-solid fa-toggle-on" aria-hidden="true"></i><div>
+      <h3>Turn on Developer mode</h3>
+      <p>Flip the <b>Developer mode</b> switch in the top-right corner of the extensions page.</p>
+    </div></div>
+    <div class="step"><i class="step-icon fa-solid fa-folder-open" aria-hidden="true"></i><div>
+      <h3>Load the extension</h3>
+      <p>Click <b>Load unpacked</b> in the top-left, then pick the <b>readit</b> folder, the one that contains <b>manifest.json</b>.</p>
+    </div></div>
+    <div class="step"><i class="step-icon fa-solid fa-thumbtack" aria-hidden="true"></i><div>
+      <h3>Pin it and start reading</h3>
+      <p>Pin the readit icon to your toolbar. Open it, click <b>Select Text</b>, drag across a passage, then press <b>Space</b> or reopen the popup and click <b>Start Reading</b>. Press <b>Esc</b> to stop.</p>
+    </div></div>
+  </div>
+  <p class="note">readit can't run on <b>chrome://</b> pages or the Chrome Web Store, and tabs that were already open need a reload after you install it.</p>
+  </section>
+
+  <section class="cta"><div><h2>Make room for the words.</h2><p>Free, open source, and private by design.</p></div><div class="hero-actions"><a class="pill red" href="#install"><i class="fa-solid fa-download" aria-hidden="true"></i> Install readit</a><a class="pill ghost" href="https://github.com/Rohan-Shridhar/readit" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-hidden="true"></i> View source</a></div></section>
+  <footer>
+    <span>Built by <a href="https://github.com/Rohan-Shridhar" target="_blank" rel="noopener">Rohan-Shridhar</a>.</span>
+    <span><a href="https://github.com/Rohan-Shridhar/readit/issues" target="_blank" rel="noopener">Report a bug</a> · <a href="https://github.com/Rohan-Shridhar/readit" target="_blank" rel="noopener">Source</a></span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+
+  // copy buttons
+  document.querySelectorAll('.copy').forEach(function(b){
+    b.addEventListener('click',function(){
+      var txt=b.parentNode.querySelector('code').textContent;
+      var done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1400)};
+      if(navigator.clipboard)navigator.clipboard.writeText(txt).then(done,done);else done();
+    });
+  });
+
+  // demo player
+  var text="Reading on a screen is tiring, and your eyes drift. readit highlights one word at a time, pauses at commas, and holds a little longer when a sentence ends. Your place never gets lost, and the page itself stays exactly as it was.";
+  var passage=$('#passage'),words=text.split(' '),spans=[],i=-1,playing=false,timer=null,wpm=250;
+  words.forEach(function(w,n){
+    var s=document.createElement('span');s.textContent=w;
+    s.addEventListener('click',function(){show(n);if(playing){clearTimeout(timer);next()}});
+    passage.appendChild(s);passage.appendChild(document.createTextNode(' '));spans.push(s);
+  });
+  var ico=$('#playIco');
+  function setIco(){ico.className=playing?'fa-solid fa-pause':'fa-solid fa-play'}
+  function delay(w){var b=60000/wpm;return /[.!?]$/.test(w)?b*1.5:/[,;:]$/.test(w)?b*1.25:w.length>10?b*1.15:b}
+  function show(n){
+    i=n;
+    spans.forEach(function(s,k){s.className=k===n?'now':(k<n?'done':'')});
+    $('#bar').style.width=((n+1)/spans.length*100)+'%';
+  }
+  function next(){
+    if(!playing)return;
+    timer=setTimeout(function(){
+      if(i+1<spans.length){show(i+1);next()}else{playing=false;setIco()}
+    },delay(words[i]));
+  }
+  function toggle(){
+    playing=!playing;setIco();clearTimeout(timer);
+    if(playing){if(i<0||i>=spans.length-1)show(0);next()}
+  }
+  $('#play').addEventListener('click',toggle);
+  $('#wpm').addEventListener('input',function(e){wpm=+e.target.value;$('#wpmOut').textContent=wpm+' WPM'});
+  $('#prog').addEventListener('click',function(e){
+    var r=this.getBoundingClientRect();show(Math.min(spans.length-1,Math.floor((e.clientX-r.left)/r.width*spans.length)));
+    if(playing){clearTimeout(timer);next()}
+  });
+  $('#dots').addEventListener('click',function(e){
+    var d=e.target.closest('.dot');if(!d)return;
+    document.querySelectorAll('.dot').forEach(function(x){x.classList.remove('on')});d.classList.add('on');
+    document.documentElement.style.setProperty('--hl',d.dataset.bg);
+    document.documentElement.style.setProperty('--hl-text',d.dataset.fg);
+  });
+  addEventListener('keydown',function(e){
+    if(/INPUT|TEXTAREA/.test((e.target||{}).tagName))return;
+    if(e.code==='Space'&&innerWidth>0&&$('#player').getBoundingClientRect().bottom>0){e.preventDefault();toggle()}
+    else if(e.key==='ArrowRight'&&i<spans.length-1)show(i+1);
+    else if(e.key==='ArrowLeft'&&i>0)show(i-1);
+    else if(e.key==='Escape'){playing=false;clearTimeout(timer);setIco();i=-1;spans.forEach(function(s){s.className=''});$('#bar').style.width='0'}
+  });
+  setIco();
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches){setTimeout(function(){if(!playing&&i<0)toggle()},900)}
+})();
+</script>
+</body>
+</html>
