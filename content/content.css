@@ -1,0 +1,82 @@
+/* readit — Content Styles */
+
+/* Highlight API default styling */
+::highlight(readit-word-highlight) {
+    background-color: var(--readit-highlight-bg, #ffe066) !important;
+    color: var(--readit-highlight-text, #111111) !important;
+}
+
+/* Page body state during selection mode */
+body.readit-selection-mode {
+    cursor: crosshair !important;
+}
+
+/* Floating feedback toast notification */
+.readit-feedback-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #1e293b;
+    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.readit-feedback-toast.readit-toast-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.readit-toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.readit-toast-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.readit-toast-title {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.readit-toast-subtitle {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.readit-toast-badge {
+    background: #0ea5e9;
+    color: #ffffff;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+}
