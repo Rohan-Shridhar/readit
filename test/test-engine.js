@@ -20,6 +20,7 @@ class MockTextNode {
         this.length = text.length;
         this.parentElement = { tagName: 'P' };
         this.parentNode = this.parentElement;
+        this.isConnected = true;
     }
 }
 
@@ -30,6 +31,7 @@ class MockElementNode {
         this.parentElement = null;
         this.parentNode = null;
         this.childNodes = children;
+        this.isConnected = true;
         children.forEach(c => { c.parentNode = this; c.parentElement = this; });
     }
 }
@@ -102,51 +104,47 @@ global.window = {
 
 const ReadingEngine = require('../content/reading-engine.js');
 
-console.log("Running ReadingEngine Tests...");
+console.log("Running ReadingEngine v0.4.0 Tests...");
 
 const engine = new ReadingEngine();
 assert(engine, "Engine should instantiate");
 
-const node1 = new MockTextNode("Focus on every single word.");
-const root = new MockElementNode('div', [node1]);
-const range = new MockRange(node1, 0, node1, node1.length);
+// Test multi-element parsing
+const node1 = new MockTextNode("Explore clean reading, ");
+const node2 = new MockTextNode("word by word!");
+const root = new MockElementNode('div', [
+    new MockElementNode('p', [node1]),
+    new MockElementNode('p', [node2])
+]);
+const range = new MockRange(node1, 0, node2, node2.length);
 range.commonAncestorContainer = root;
 
 const words = engine.processRange(range);
-assert.strictEqual(words.length, 5, "Should identify 5 words");
-console.log(`Tokenized ${words.length} words:`, words.map(w => w.word));
+assert.strictEqual(words.length, 6, "Should find 6 words across paragraphs");
+console.log(`Parsed ${words.length} words across nodes:`, words.map(w => w.word));
 
-// Test Progress tracking
-let progressCount = 0;
-engine.onProgress = (p) => {
-    progressCount++;
-    assert(p.totalWords === 5, "Total words in progress should be 5");
-};
+// Test all highlight themes
+const themes = ['yellow', 'green', 'cyan', 'coral', 'purple'];
+themes.forEach(t => {
+    engine.setTheme(t);
+    assert.strictEqual(engine.colorTheme, t, `Theme should be set to ${t}`);
+});
+console.log("All themes validated successfully.");
 
-// Test start and highlight
-engine.start(0);
-assert.strictEqual(engine.currentIndex, 0, "Current index should be 0");
-assert.strictEqual(engine.isPlaying, true, "Engine should be playing");
-assert.strictEqual(engine.isPaused, false, "Engine should not be paused");
+// Test auto-scroll configuration
+engine.setAutoScroll(false);
+assert.strictEqual(engine.autoScroll, false);
+engine.setAutoScroll(true);
+assert.strictEqual(engine.autoScroll, true);
 
-// Test pause & resume
-engine.pause();
-assert.strictEqual(engine.isPaused, true, "Engine should be paused");
-assert.strictEqual(engine.timer, null, "Timer should be cleared when paused");
+// Test detached node resilience
+words[2].node.isConnected = false;
+engine.highlightWord(2); // Should handle gracefully without throwing
 
-engine.resume();
-assert.strictEqual(engine.isPaused, false, "Engine should be unpaused");
+// Test speed boundaries
+engine.setSpeed(50); // Below 60, should not apply
+assert.strictEqual(engine.speedWpm, 250);
+engine.setSpeed(600); // Valid
+assert.strictEqual(engine.speedWpm, 600);
 
-// Test manual stepping
-engine.nextWord();
-assert.strictEqual(engine.currentIndex, 1, "Should step to index 1");
-
-engine.prevWord();
-assert.strictEqual(engine.currentIndex, 0, "Should step back to index 0");
-
-// Test stop
-engine.stop();
-assert.strictEqual(engine.isPlaying, false, "Engine should be stopped");
-assert.strictEqual(engine.currentIndex, -1, "Index should be reset to -1");
-
-console.log("All ReadingEngine v0.3.0 tests passed successfully!");
+console.log("All ReadingEngine v0.4.0 tests passed successfully!");

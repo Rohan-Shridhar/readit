@@ -327,7 +327,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.1 — Highlight Customization
 
-- [ ] **Objective:** Allow users to customize the active word's appearance.
+- [x] **Objective:** Allow users to customize the active word's appearance.
 - **Prerequisites:** Version 0.3.0.
 - **Part:** Frontend / Styling.
 - **Motive:** Personalization.
@@ -345,7 +345,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.2 — Keyboard Navigation
 
-- [ ] **Objective:** Introduce additional keyboard controls for reading.
+- [x] **Objective:** Introduce additional keyboard controls for reading.
 - **Prerequisites:** Step 0.3.4.
 - **Part:** Webpage Interaction.
 - **Motive:** Accessibility.
@@ -362,7 +362,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.3 — Automatic Scroll Support
 
-- [ ] **Objective:** Keep the active word visible while reading longer content.
+- [x] **Objective:** Keep the active word visible while reading longer content.
 - **Prerequisites:** Version 0.3.0.
 - **Part:** Webpage Interaction.
 - **Motive:** Reading Experience.
@@ -381,7 +381,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.4 — Website Compatibility
 
-- [ ] **Objective:** Ensure the extension works across different webpage structures.
+- [x] **Objective:** Ensure the extension works across different webpage structures.
 - **Prerequisites:** Version 0.2.0.
 - **Part:** Testing / Compatibility.
 - **Motive:** Reliability.
@@ -401,7 +401,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.5 — Performance Optimization
 
-- [ ] **Objective:** Improve the extension's performance and resource usage.
+- [x] **Objective:** Improve the extension's performance and resource usage.
 - **Prerequisites:** Step 0.4.4.
 - **Part:** Optimization.
 - **Motive:** Performance.
@@ -421,7 +421,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.4.6 — Error Handling
 
-- [ ] **Objective:** Handle unexpected situations without breaking the reading experience.
+- [x] **Objective:** Handle unexpected situations without breaking the reading experience.
 - **Prerequisites:** Step 0.4.4.
 - **Part:** Reliability.
 - **Motive:** Stability.
@@ -532,7 +532,7 @@ Every version follows the development lifecycle:
 | v0.1.0 | Foundation | Planned |
 | v0.2.0 | Text Selection & Reading Engine | Completed |
 | v0.3.0 | Reading Controls | Completed |
-| v0.4.0 | Customization & Stability | Planned |
+| v0.4.0 | Customization & Stability | Completed |
 | v1.0.0 | Stable Release | Planned |
 
 ---
