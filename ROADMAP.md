@@ -449,7 +449,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 1.0.1 — Complete Functional Testing
 
-- [ ] **Objective:** Verify that all core features work as expected.
+- [x] **Objective:** Verify that all core features work as expected.
 - **Prerequisites:** Version 0.4.0.
 - **Part:** Testing.
 - **Motive:** Quality Assurance.
@@ -467,7 +467,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 1.0.2 — UI & UX Finalization
 
-- [ ] **Objective:** Finalize the extension's visual design and usability.
+- [x] **Objective:** Finalize the extension's visual design and usability.
 - **Prerequisites:** Step 1.0.1.
 - **Part:** Frontend.
 - **Motive:** User Experience.
@@ -481,7 +481,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 1.0.3 — Documentation
 
-- [ ] **Objective:** Prepare complete project documentation.
+- [x] **Objective:** Prepare complete project documentation.
 - **Prerequisites:** Step 1.0.2.
 - **Part:** Documentation.
 - **Motive:** Project Presentation.
@@ -496,7 +496,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 1.0.4 — Production Build & Release
 
-- [ ] **Objective:** Prepare and publish the stable extension release.
+- [x] **Objective:** Prepare and publish the stable extension release.
 - **Prerequisites:** Step 1.0.3.
 - **Part:** Deployment.
 - **Motive:** Production.
@@ -533,7 +533,7 @@ Every version follows the development lifecycle:
 | v0.2.0 | Text Selection & Reading Engine | Completed |
 | v0.3.0 | Reading Controls | Completed |
 | v0.4.0 | Customization & Stability | Completed |
-| v1.0.0 | Stable Release | Planned |
+| v1.0.0 | Stable Release | Completed |
 
 ---
 
