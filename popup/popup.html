@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reading Assistant</title>
+
+    <link rel="stylesheet" href="popup.css">
+    <script src="popup.js" defer></script>
+</head>
+
+<body>
+
+    <main class="popup-container">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <img src="icons\icon128.png" />
+                </div>
+
+                <div>
+                    <h1>Reading Assistant</h1>
+                    <p>Read one word at a time.</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Selection Status -->
+        <section class="selection-section">
+
+            <div class="section-heading">
+                <span>Reading Session</span>
+                <span class="status-badge" id="statusBadge">
+                    Idle
+                </span>
+            </div>
+
+            <div class="selection-status" id="selectionStatus">
+                <span class="status-icon" id="statusIcon">◎</span>
+
+                <div class="status-content">
+                    <h2 id="statusTitle">No text selected</h2>
+                    <p id="statusDescription">
+                        Select text from the webpage to get started.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Main Action -->
+        <section class="action-section">
+
+            <button id="selectBtn" class="primary-button">
+                <span id="buttonIcon">＋</span>
+                <span id="buttonText">Select Text</span>
+            </button>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span>Reading Assistant</span>
+            <span>v0.1.0</span>
+        </footer>
+
+    </main>
+
+</body>
+</html>
