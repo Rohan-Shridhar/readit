@@ -17,7 +17,7 @@ body {
 }
 
 .header {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .brand {
@@ -69,6 +69,32 @@ body {
 .badge.badge-paused {
     background: #fef3c7;
     color: #b45309;
+}
+
+/* Error Alert */
+.error-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    color: #b91c1c;
+    font-size: 11.5px;
+    line-height: 1.35;
+}
+
+.error-alert.hidden {
+    display: none;
+}
+
+.alert-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
 /* Selection and Progress Card */
@@ -252,10 +278,10 @@ body {
     color: #b91c1c;
 }
 
-/* Speed Settings */
+/* Settings and Preferences */
 .settings-section {
     background: #ffffff;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 12px;
@@ -280,6 +306,12 @@ body {
     font-size: 12px;
     font-weight: 700;
     color: #0f172a;
+}
+
+.settings-divider {
+    height: 1px;
+    background: #f1f5f9;
+    margin: 10px 0;
 }
 
 .speed-slider {
@@ -317,6 +349,55 @@ body {
     background: #e0f2fe;
     color: #0369a1;
     border-color: #7dd3fc;
+}
+
+/* Theme Swatches */
+.theme-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-top: 4px;
+}
+
+.theme-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-swatch:hover {
+    transform: scale(1.1);
+}
+
+.theme-swatch.active {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0284c7;
+    transform: scale(1.08);
+}
+
+.swatch-yellow { background: #ffe066; }
+.swatch-green  { background: #86efac; }
+.swatch-cyan   { background: #7dd3fc; }
+.swatch-coral  { background: #fda4af; }
+.swatch-purple { background: #d8b4fe; }
+
+/* Toggle Row */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.switch-checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: #0284c7;
+    cursor: pointer;
 }
 
 /* Shortcuts tip */

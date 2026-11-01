@@ -1,6 +1,7 @@
 /**
- * readit — Reading Engine
- * Word-by-word text processing, range mapping, and sequential highlighting engine.
+ * readit — Reading Engine (v0.4.0)
+ * Word-by-word text processing, range mapping, sequential highlighting,
+ * multi-theme support, auto-scroll coordination, and robust error recovery.
  */
 
 (function (global) {
@@ -16,6 +17,7 @@
             this.speedWpm = 250; // default 250 words per minute
             this.colorTheme = 'yellow';
             this.autoScroll = true;
+            this.lastScrolledLineTop = null;
             this.onProgress = null;
             this.onComplete = null;
             this.onError = null;
@@ -40,9 +42,6 @@
                         background-color: var(--readit-highlight-bg, #ffe066) !important;
                         color: var(--readit-highlight-text, #111111) !important;
                     }
-                    .readit-reading-active {
-                        user-select: none;
-                    }
                     .readit-highlight-overlay {
                         position: absolute;
                         pointer-events: none;
@@ -52,24 +51,24 @@
                         box-sizing: border-box;
                     }
                     .readit-theme-yellow {
-                        background-color: rgba(255, 224, 102, 0.4);
-                        box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.6), 0 2px 8px rgba(234, 179, 8, 0.25);
+                        background-color: rgba(255, 224, 102, 0.42);
+                        box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.7), 0 2px 8px rgba(234, 179, 8, 0.3);
                     }
                     .readit-theme-green {
-                        background-color: rgba(110, 231, 183, 0.4);
-                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6), 0 2px 8px rgba(16, 185, 129, 0.25);
+                        background-color: rgba(110, 231, 183, 0.42);
+                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.7), 0 2px 8px rgba(16, 185, 129, 0.3);
                     }
                     .readit-theme-cyan {
-                        background-color: rgba(103, 232, 249, 0.4);
-                        box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.6), 0 2px 8px rgba(6, 182, 212, 0.25);
+                        background-color: rgba(103, 232, 249, 0.42);
+                        box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.7), 0 2px 8px rgba(6, 182, 212, 0.3);
                     }
                     .readit-theme-coral {
-                        background-color: rgba(254, 205, 211, 0.5);
-                        box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.6), 0 2px 8px rgba(244, 63, 94, 0.25);
+                        background-color: rgba(254, 205, 211, 0.48);
+                        box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.7), 0 2px 8px rgba(244, 63, 94, 0.3);
                     }
                     .readit-theme-purple {
-                        background-color: rgba(221, 214, 254, 0.5);
-                        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.6), 0 2px 8px rgba(139, 92, 246, 0.25);
+                        background-color: rgba(221, 214, 254, 0.48);
+                        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.7), 0 2px 8px rgba(139, 92, 246, 0.3);
                     }
                 `;
                 document.head.appendChild(style);
@@ -80,9 +79,11 @@
          * Get or create the visual indicator overlay element.
          */
         getOrCreateIndicator() {
-            if (this.indicatorElement && document.body.contains(this.indicatorElement)) {
+            if (this.indicatorElement && document.body && document.body.contains(this.indicatorElement)) {
                 return this.indicatorElement;
             }
+            if (typeof document === 'undefined' || !document.body) return null;
+
             const el = document.createElement('div');
             el.className = `readit-highlight-overlay readit-theme-${this.colorTheme}`;
             el.style.display = 'none';
@@ -108,7 +109,7 @@
             };
 
             const colors = themeColors[this.colorTheme];
-            if (typeof document !== 'undefined') {
+            if (typeof document !== 'undefined' && document.documentElement) {
                 document.documentElement.style.setProperty('--readit-highlight-bg', colors.bg);
                 document.documentElement.style.setProperty('--readit-highlight-text', colors.text);
             }
@@ -130,8 +131,17 @@
         }
 
         /**
+         * Enable or disable automatic scrolling.
+         * @param {boolean} enabled 
+         */
+        setAutoScroll(enabled) {
+            this.autoScroll = Boolean(enabled);
+        }
+
+        /**
          * Parse a DOM Range into individually addressable word ranges.
-         * Preserves original DOM nodes, formatting, punctuation, and reading order.
+         * Handles complex DOM structures, nested formatting, headings, lists, blockquotes,
+         * and preserves original content and reading order without altering DOM nodes.
          * @param {Range} range 
          * @returns {Array<{ index: number, word: string, range: Range, node: Node, startOffset: number, endOffset: number }>}
          */
@@ -142,24 +152,33 @@
             }
 
             const words = [];
-            const commonAncestor = range.commonAncestorContainer;
+            let commonAncestor = null;
+            try {
+                commonAncestor = range.commonAncestorContainer;
+            } catch (err) {
+                console.warn("Readit: Invalid range container", err);
+                return [];
+            }
+
+            if (!commonAncestor) return [];
+
             const root = commonAncestor.nodeType === Node.TEXT_NODE
                 ? commonAncestor.parentNode
                 : commonAncestor;
+
+            if (!root) return [];
 
             const treeWalker = document.createTreeWalker(
                 root,
                 NodeFilter.SHOW_TEXT,
                 {
                     acceptNode: (node) => {
-                        // Skip script, style, noscript, or hidden elements
                         const parent = node.parentElement;
                         if (!parent) return NodeFilter.FILTER_REJECT;
                         const tag = parent.tagName.toLowerCase();
-                        if (['script', 'style', 'noscript', 'textarea', 'input'].includes(tag)) {
+                        if (['script', 'style', 'noscript', 'textarea', 'input', 'select', 'svg'].includes(tag)) {
                             return NodeFilter.FILTER_REJECT;
                         }
-                        // Check if node intersects range
                         try {
                             if (range.intersectsNode(node)) {
                                 return NodeFilter.FILTER_ACCEPT;
@@ -173,29 +192,29 @@
             );
 
             let currentNode = treeWalker.nextNode();
-            // In case root is itself a text node inside the range
             if (!currentNode && commonAncestor.nodeType === Node.TEXT_NODE) {
-                if (range.intersectsNode(commonAncestor)) {
-                    currentNode = commonAncestor;
-                }
+                try {
+                    if (range.intersectsNode(commonAncestor)) {
+                        currentNode = commonAncestor;
+                    }
+                } catch (e) {}
             }
 
             while (currentNode) {
                 const text = currentNode.nodeValue;
-                if (text) {
+                if (text && text.trim().length > 0) {
                     let startIdx = 0;
                     let endIdx = text.length;
 
                     if (currentNode === range.startContainer) {
-                        startIdx = range.startOffset;
+                        startIdx = Math.max(0, range.startOffset);
                     }
                     if (currentNode === range.endContainer) {
-                        endIdx = range.endOffset;
+                        endIdx = Math.min(text.length, range.endOffset);
                     }
 
                     if (startIdx < endIdx) {
                         const slice = text.substring(startIdx, endIdx);
-                        // Regex matching words: consecutive non-whitespace characters
                         const wordRegex = /\S+/g;
                         let match;
 
@@ -218,7 +237,7 @@
                                     endOffset: wordEnd
                                 });
                             } catch (err) {
-                                console.warn("Readit: Failed to create word range", err);
+                                // Skip detached or invalid sub-ranges gracefully
                             }
                         }
                     }
@@ -229,6 +248,7 @@
 
             this.words = words;
             this.currentIndex = -1;
+            this.lastScrolledLineTop = null;
             return words;
         }
 
@@ -246,70 +266,91 @@
             const item = this.words[index];
             const range = item.range;
 
-            // 1. CSS Custom Highlight API (supported in modern Chrome)
+            // Check if node is still connected to document (compatibility check)
+            if (item.node && typeof item.node.isConnected === 'boolean' && !item.node.isConnected) {
+                // If node was modified or detached, skip to next word
+                console.warn("Readit: Word node disconnected from DOM, skipping.");
+                if (this.isPlaying && !this.isPaused) {
+                    this.nextWord();
+                }
+                return;
+            }
+
+            // 1. CSS Custom Highlight API
             if (typeof Highlight !== 'undefined' && typeof CSS !== 'undefined' && CSS.highlights) {
                 try {
                     const highlight = new Highlight(range);
                     CSS.highlights.set(this.highlightName, highlight);
                 } catch (e) {
-                    console.warn("Readit: CSS Highlight API error", e);
+                    // Fail gracefully if Highlight API encounters any issue
                 }
             }
 
-            // 2. Visual smooth indicator overlay
+            // 2. Smooth visual indicator overlay
             try {
                 const rect = range.getBoundingClientRect();
                 if (rect.width > 0 && rect.height > 0) {
                     const indicator = this.getOrCreateIndicator();
-                    const scrollX = window.scrollX || window.pageXOffset || 0;
-                    const scrollY = window.scrollY || window.pageYOffset || 0;
+                    if (indicator) {
+                        const scrollX = window.scrollX || window.pageXOffset || 0;
+                        const scrollY = window.scrollY || window.pageYOffset || 0;
+                        const padX = 2;
+                        const padY = 2;
 
-                    // Add subtle padding around the active word
-                    const padX = 2;
-                    const padY = 2;
+                        indicator.style.display = 'block';
+                        indicator.style.left = `${rect.left + scrollX - padX}px`;
+                        indicator.style.top = `${rect.top + scrollY - padY}px`;
+                        indicator.style.width = `${rect.width + padX * 2}px`;
+                        indicator.style.height = `${rect.height + padY * 2}px`;
 
-                    indicator.style.display = 'block';
-                    indicator.style.left = `${rect.left + scrollX - padX}px`;
-                    indicator.style.top = `${rect.top + scrollY - padY}px`;
-                    indicator.style.width = `${rect.width + padX * 2}px`;
-                    indicator.style.height = `${rect.height + padY * 2}px`;
-
-                    // 3. Smooth auto-scrolling if active word goes offscreen
-                    if (this.autoScroll) {
-                        this.ensureVisible(rect);
+                        // 3. Auto-scroll support
+                        if (this.autoScroll) {
+                            this.ensureVisible(rect);
+                        }
                     }
                 }
             } catch (e) {
-                console.warn("Readit: Indicator placement error", e);
+                // Error boundary for geometry calculation
             }
 
             if (typeof this.onProgress === 'function') {
-                this.onProgress({
-                    currentIndex: index,
-                    totalWords: this.words.length,
-                    currentWord: item.word,
-                    percentage: Math.round(((index + 1) / this.words.length) * 100)
-                });
+                try {
+                    this.onProgress({
+                        currentIndex: index,
+                        totalWords: this.words.length,
+                        currentWord: item.word,
+                        percentage: Math.round(((index + 1) / this.words.length) * 100)
+                    });
+                } catch (e) {}
             }
         }
 
         /**
-         * Ensure the active word is comfortably inside the viewport.
+         * Keep the active word visible and centered in the viewport.
          */
         ensureVisible(rect) {
+            if (typeof window === 'undefined') return;
             const viewportHeight = window.innerHeight;
-            const buffer = 80;
+            const topMargin = 120;
+            const bottomMargin = 160;
 
-            if (rect.bottom > viewportHeight - buffer) {
-                window.scrollBy({
-                    top: rect.bottom - (viewportHeight / 2),
-                    behavior: 'smooth'
-                });
-            } else if (rect.top < buffer) {
-                window.scrollBy({
-                    top: rect.top - (viewportHeight / 3),
-                    behavior: 'smooth'
-                });
+            const isBelow = rect.bottom > viewportHeight - bottomMargin;
+            const isAbove = rect.top < topMargin;
+
+            if (isBelow || isAbove) {
+                // Throttle scroll per line to avoid jittery movements
+                const lineKey = Math.round(rect.top / 30);
+                if (this.lastScrolledLineTop !== lineKey) {
+                    this.lastScrolledLineTop = lineKey;
+                    const scrollTarget = isBelow
+                        ? rect.bottom - (viewportHeight / 2)
+                        : rect.top - (viewportHeight / 3);
+
+                    window.scrollBy({
+                        top: scrollTarget,
+                        behavior: 'smooth'
+                    });
+                }
             }
         }
 
@@ -341,7 +382,7 @@
         start(fromIndex = 0) {
             if (this.words.length === 0) {
                 if (typeof this.onError === 'function') {
-                    this.onError("No words to read.");
+                    this.onError("No words available to read.");
                 }
                 return;
             }
@@ -442,11 +483,12 @@
             this.isPlaying = false;
             this.isPaused = false;
             this.currentIndex = -1;
+            this.lastScrolledLineTop = null;
             this.clearHighlight();
         }
 
         /**
-         * Stop active timers.
+         * Stop active timers safely.
          */
         stopTimers() {
             if (this.timer) {
