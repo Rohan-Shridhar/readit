@@ -27,8 +27,8 @@ body {
 }
 
 .brand-icon {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
 }
 
@@ -66,7 +66,12 @@ body {
     color: #15803d;
 }
 
-/* Selection Info Card */
+.badge.badge-paused {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/* Selection and Progress Card */
 .selection-info {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -100,12 +105,28 @@ body {
     color: #0284c7;
 }
 
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0284c7, #10b981);
+    border-radius: 999px;
+    transition: width 0.15s ease-out;
+}
+
 .preview-snippet {
-    font-size: 12px;
+    font-size: 11.5px;
     line-height: 1.4;
     color: #475569;
     font-style: italic;
-    max-height: 48px;
+    max-height: 44px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -113,9 +134,13 @@ body {
     -webkit-box-orient: vertical;
 }
 
-/* Actions */
+/* Initial Actions */
 .action-section {
     margin-bottom: 14px;
+}
+
+.action-section.hidden {
+    display: none;
 }
 
 .primary-button {
@@ -153,14 +178,161 @@ body {
     background: #15803d;
 }
 
-.primary-button.btn-reading {
-    background: #d97706;
+/* Active Reading Controls */
+.reading-controls-section {
+    margin-bottom: 14px;
 }
 
+.reading-controls-section.hidden {
+    display: none;
+}
+
+.controls-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 40px 40px;
+    gap: 8px;
+    align-items: center;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+
+.control-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.control-btn:active {
+    transform: scale(0.97);
+}
+
+.primary-control-btn {
+    background: #16a34a;
+    color: #ffffff;
+    border-color: #16a34a;
+    font-weight: 600;
+    font-size: 13px;
+    gap: 6px;
+}
+
+.primary-control-btn:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #ffffff;
+}
+
+.primary-control-btn.is-paused {
+    background: #0284c7;
+    border-color: #0284c7;
+}
+
+.primary-control-btn.is-paused:hover {
+    background: #0369a1;
+}
+
+.stop-control-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.stop-control-btn:hover {
+    background: #fecaca;
+    color: #b91c1c;
+}
+
+/* Speed Settings */
+.settings-section {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.settings-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.03em;
+}
+
+.settings-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.speed-slider {
+    width: 100%;
+    accent-color: #0284c7;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+.speed-presets {
+    display: flex;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.preset-pill {
+    flex: 1;
+    padding: 4px 0;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+
+.preset-pill:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.preset-pill.active {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-color: #7dd3fc;
+}
+
+/* Shortcuts tip */
+.shortcuts-tip {
+    font-size: 10px;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Button & Icon helpers */
 .btn-icon {
     width: 16px;
     height: 16px;
     stroke: currentColor;
+    flex-shrink: 0;
 }
 
 /* Footer */

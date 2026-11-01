@@ -11,6 +11,7 @@
 
 <body>
     <main class="popup-container">
+        <!-- Header -->
         <header class="header">
             <div class="brand">
                 <img class="brand-icon" src="../icons/icon64.png" alt="readit logo">
@@ -21,29 +22,83 @@
             </div>
         </header>
 
-        <!-- Selection preview banner -->
+        <!-- Progress and Selection Info -->
         <section id="selectionInfo" class="selection-info hidden">
             <div class="info-row">
-                <span class="info-label">Selected:</span>
-                <span id="wordCountLabel" class="info-value">0 words</span>
+                <span class="info-label" id="progressStatusLabel">Progress</span>
+                <span id="wordProgressLabel" class="info-value">0 / 0 words</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar-fill" style="width: 0%;"></div>
             </div>
             <p id="previewSnippet" class="preview-snippet"></p>
         </section>
 
-        <!-- Main Action Buttons -->
-        <section class="action-section">
-            <button id="selectBtn" class="primary-button">
-                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Primary Action Section (Idle / Selected) -->
+        <section id="initialActions" class="action-section">
+            <button id="mainActionBtn" class="primary-button">
+                <svg id="mainActionIcon" class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                <span id="buttonText">Select Text</span>
+                <span id="mainActionText">Select Text</span>
             </button>
         </section>
 
+        <!-- Active Reading Controls (Reading / Paused) -->
+        <section id="readingControls" class="reading-controls-section hidden">
+            <div class="controls-row">
+                <button id="prevBtn" class="control-btn" title="Previous Word (←)">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                        <line x1="5" y1="19" x2="5" y2="5"></line>
+                    </svg>
+                </button>
+                <button id="pauseResumeBtn" class="control-btn primary-control-btn" title="Pause / Resume (Space)">
+                    <svg id="pauseResumeIcon" class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <span id="pauseResumeText">Pause</span>
+                </button>
+                <button id="nextBtn" class="control-btn" title="Next Word (→)">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                        <line x1="19" y1="5" x2="19" y2="19"></line>
+                    </svg>
+                </button>
+                <button id="stopBtn" class="control-btn stop-control-btn" title="Stop Reading (Esc)">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <rect x="5" y="5" width="14" height="14" rx="2" ry="2"></rect>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Speed Settings -->
+        <section class="settings-section">
+            <div class="settings-header">
+                <label for="speedRange" class="settings-label">Reading Speed</label>
+                <span id="speedDisplay" class="settings-value">250 WPM</span>
+            </div>
+            <input type="range" id="speedRange" min="100" max="700" step="25" value="250" class="speed-slider">
+            <div class="speed-presets">
+                <button class="preset-pill" data-speed="175">175</button>
+                <button class="preset-pill active" data-speed="250">250</button>
+                <button class="preset-pill" data-speed="350">350</button>
+                <button class="preset-pill" data-speed="500">500</button>
+            </div>
+        </section>
+
+        <!-- Shortcuts Tip -->
+        <div class="shortcuts-tip">
+            <span><strong>Shortcuts:</strong> Space: Pause • Esc: Stop • ←/→: Step</span>
+        </div>
+
+        <!-- Footer -->
         <footer class="footer">
             <span>readit</span>
-            <span id="versionLabel">v0.2.0</span>
+            <span id="versionLabel">v0.3.0</span>
         </footer>
     </main>
 </body>
