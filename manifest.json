@@ -1,0 +1,37 @@
+{
+    "manifest_version": 3,
+
+    "name": "readit",
+    "version": "0.1.0",
+    "description": "Improve reading experience by word-by-word highlighting on webpages",
+
+    "icons":{
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+
+    "action":{
+        "default_popup": "popup.html",
+        "default_title": "readit",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["https://*/*",
+                        "http://*/*"],
+            "js": ["content/content.js"],
+            "css": ["content/content.css"]
+        }
+    ],
+    "background": {
+        "service_worker": "background/background.js"
+    }
+}
