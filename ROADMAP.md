@@ -121,7 +121,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.2.1 — Selection Mode
 
-- [ ] **Objective:** Allow users to select webpage text through the extension.
+- [x] **Objective:** Allow users to select webpage text through the extension.
 - **Prerequisites:** Version 0.1.0.
 - **Part:** Frontend / Webpage Interaction.
 - **Motive:** Core Functionality.
@@ -141,7 +141,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.2.2 — Selection State Management
 
-- [ ] **Objective:** Preserve the selected text and communicate its availability to the popup.
+- [x] **Objective:** Preserve the selected text and communicate its availability to the popup.
 - **Prerequisites:** Step 0.2.1.
 - **Part:** Extension Communication.
 - **Motive:** State Management.
@@ -161,7 +161,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.2.3 — Word Processing Engine
 
-- [ ] **Objective:** Convert selected text into individually addressable words.
+- [x] **Objective:** Convert selected text into individually addressable words.
 - **Prerequisites:** Step 0.2.2.
 - **Part:** Text Processing.
 - **Motive:** Reading Engine.
@@ -183,7 +183,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.2.4 — Sequential Word Highlighting
 
-- [ ] **Objective:** Highlight selected words sequentially, one word at a time.
+- [x] **Objective:** Highlight selected words sequentially, one word at a time.
 - **Prerequisites:** Step 0.2.3.
 - **Part:** Reading Engine.
 - **Motive:** Core Functionality.
@@ -202,7 +202,7 @@ The reading experience can be stopped at any time using the `ESC` key, restoring
 
 ### Step 0.2.5 — Reading Animation
 
-- [ ] **Objective:** Implement visual effects for the currently active word.
+- [x] **Objective:** Implement visual effects for the currently active word.
 - **Prerequisites:** Step 0.2.4.
 - **Part:** Frontend / Animation.
 - **Motive:** User Experience.
@@ -530,7 +530,7 @@ Every version follows the development lifecycle:
 | Version | Milestone | Status |
 |---|---|---|
 | v0.1.0 | Foundation | Planned |
-| v0.2.0 | Text Selection & Reading Engine | Planned |
+| v0.2.0 | Text Selection & Reading Engine | Completed |
 | v0.3.0 | Reading Controls | Planned |
 | v0.4.0 | Customization & Stability | Planned |
 | v1.0.0 | Stable Release | Planned |
