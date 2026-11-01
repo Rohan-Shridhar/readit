@@ -22,6 +22,16 @@
             </div>
         </header>
 
+        <!-- Error / Warning Banner -->
+        <div id="errorAlert" class="error-alert hidden">
+            <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="errorMessage" class="error-text">Notice</span>
+        </div>
+
         <!-- Progress and Selection Info -->
         <section id="selectionInfo" class="selection-info hidden">
             <div class="info-row">
@@ -75,8 +85,9 @@
             </div>
         </section>
 
-        <!-- Speed Settings -->
+        <!-- Preferences & Customization -->
         <section class="settings-section">
+            <!-- Speed Control -->
             <div class="settings-header">
                 <label for="speedRange" class="settings-label">Reading Speed</label>
                 <span id="speedDisplay" class="settings-value">250 WPM</span>
@@ -88,6 +99,26 @@
                 <button class="preset-pill" data-speed="350">350</button>
                 <button class="preset-pill" data-speed="500">500</button>
             </div>
+
+            <!-- Highlight Theme Selection -->
+            <div class="settings-divider"></div>
+            <div class="settings-header">
+                <span class="settings-label">Highlight Color</span>
+            </div>
+            <div class="theme-selector" id="themeSelector">
+                <button class="theme-swatch swatch-yellow active" data-theme="yellow" title="Sun Yellow"></button>
+                <button class="theme-swatch swatch-green" data-theme="green" title="Emerald Green"></button>
+                <button class="theme-swatch swatch-cyan" data-theme="cyan" title="Electric Cyan"></button>
+                <button class="theme-swatch swatch-coral" data-theme="coral" title="Sunset Coral"></button>
+                <button class="theme-swatch swatch-purple" data-theme="purple" title="Lavender Calm"></button>
+            </div>
+
+            <!-- Auto-Scroll Toggle -->
+            <div class="settings-divider"></div>
+            <label class="toggle-row">
+                <span class="settings-label">Auto-scroll page</span>
+                <input type="checkbox" id="autoScrollToggle" checked class="switch-checkbox">
+            </label>
         </section>
 
         <!-- Shortcuts Tip -->
@@ -98,7 +129,7 @@
         <!-- Footer -->
         <footer class="footer">
             <span>readit</span>
-            <span id="versionLabel">v0.3.0</span>
+            <span id="versionLabel">v0.4.0</span>
         </footer>
     </main>
 </body>

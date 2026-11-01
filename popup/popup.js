@@ -1,11 +1,15 @@
 /**
- * readit — Popup Controller (v0.3.0)
- * Manages user interactions, reading controls, speed preferences, and live progress.
+ * readit — Popup Controller (v0.4.0)
+ * Manages user interactions, reading controls, speed, theme customization,
+ * auto-scroll preferences, and graceful error handling.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
     // Elements
     const statusBadge = document.getElementById("statusBadge");
+    const errorAlert = document.getElementById("errorAlert");
+    const errorMessage = document.getElementById("errorMessage");
+
     const selectionInfo = document.getElementById("selectionInfo");
     const progressStatusLabel = document.getElementById("progressStatusLabel");
     const wordProgressLabel = document.getElementById("wordProgressLabel");
@@ -29,19 +33,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const speedDisplay = document.getElementById("speedDisplay");
     const presetPills = document.querySelectorAll(".preset-pill");
 
-    let currentState = "idle"; // idle | selected | reading | paused
+    const themeSwatches = document.querySelectorAll(".theme-swatch");
+    const autoScrollToggle = document.getElementById("autoScrollToggle");
+
+    let currentState = "idle";
     let currentWordCount = 0;
 
-    // Load saved speed setting from chrome.storage
+    // Show error or warning message
+    function showError(msg) {
+        if (!msg) {
+            errorAlert.classList.add("hidden");
+            return;
+        }
+        errorMessage.textContent = msg;
+        errorAlert.classList.remove("hidden");
+    }
+
+    // Load saved settings from chrome.storage
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['readit_speed'], (result) => {
+        chrome.storage.local.get(['readit_speed', 'readit_theme', 'readit_autoscroll'], (result) => {
             if (result.readit_speed) {
                 setSpeedValue(result.readit_speed, false);
+            }
+            if (result.readit_theme) {
+                setThemeValue(result.readit_theme, false);
+            }
+            if (typeof result.readit_autoscroll === 'boolean') {
+                autoScrollToggle.checked = result.readit_autoscroll;
+                chrome.runtime.sendMessage({ type: "SET_AUTOSCROLL", autoScroll: result.readit_autoscroll }).catch(() => {});
             }
         });
     }
 
-    // Set Speed in UI and forward to content script
+    // Speed handler
     function setSpeedValue(speed, notifyContent = true) {
         const val = parseInt(speed, 10);
         if (isNaN(val)) return;
@@ -63,6 +87,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (notifyContent) {
             chrome.runtime.sendMessage({ type: "SET_SPEED", speed: val }).catch(() => {});
+        }
+    }
+
+    // Theme handler
+    function setThemeValue(theme, notifyContent = true) {
+        themeSwatches.forEach(swatch => {
+            if (swatch.dataset.theme === theme) {
+                swatch.classList.add("active");
+            } else {
+                swatch.classList.remove("active");
+            }
+        });
+
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ readit_theme: theme });
+        }
+
+        if (notifyContent) {
+            chrome.runtime.sendMessage({ type: "SET_THEME", theme }).catch(() => {});
         }
     }
 
@@ -158,12 +201,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // Query status on popup open
     chrome.runtime.sendMessage({ type: "GET_STATUS" }, (response) => {
         if (chrome.runtime.lastError || !response || !response.success) {
+            if (response && response.message) {
+                showError(response.message);
+            }
             updateStateUI("idle");
             return;
         }
 
+        showError(null);
+
         if (response.speedWpm) {
             setSpeedValue(response.speedWpm, false);
+        }
+        if (response.colorTheme) {
+            setThemeValue(response.colorTheme, false);
+        }
+        if (typeof response.autoScroll === 'boolean') {
+            autoScrollToggle.checked = response.autoScroll;
         }
 
         updateStateUI(response.state || "idle", {
@@ -177,19 +231,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // Main action button click (Select Text or Start Reading)
     mainActionBtn.addEventListener("click", () => {
         if (currentState === "idle") {
-            chrome.runtime.sendMessage({ type: "START_SELECTION" }, () => {
-                window.close();
+            chrome.runtime.sendMessage({ type: "START_SELECTION" }, (res) => {
+                if (res && res.success) {
+                    window.close();
+                } else if (res && res.message) {
+                    showError(res.message);
+                }
             });
         } else if (currentState === "selected") {
             chrome.runtime.sendMessage({ type: "START_READING" }, (response) => {
                 if (response && response.success) {
                     updateStateUI("reading", { totalWords: currentWordCount, currentIndex: 0 });
+                } else if (response && response.message) {
+                    showError(response.message);
                 }
             });
         }
     });
 
-    // Reading controls
+    // Reading playback controls
     pauseResumeBtn.addEventListener("click", () => {
         if (currentState === "reading") {
             chrome.runtime.sendMessage({ type: "PAUSE_READING" }, (res) => {
@@ -225,6 +285,22 @@ document.addEventListener("DOMContentLoaded", () => {
         pill.addEventListener("click", () => {
             setSpeedValue(pill.dataset.speed, true);
         });
+    });
+
+    // Theme selector listeners
+    themeSwatches.forEach(swatch => {
+        swatch.addEventListener("click", () => {
+            setThemeValue(swatch.dataset.theme, true);
+        });
+    });
+
+    // Auto-scroll toggle listener
+    autoScrollToggle.addEventListener("change", (e) => {
+        const enabled = e.target.checked;
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ readit_autoscroll: enabled });
+        }
+        chrome.runtime.sendMessage({ type: "SET_AUTOSCROLL", autoScroll: enabled }).catch(() => {});
     });
 
     // Listen for live messages from content script
