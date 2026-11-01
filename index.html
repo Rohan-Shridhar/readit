@@ -105,6 +105,7 @@ footer a:hover{color:var(--mist);text-decoration:underline}
 /* Original open-source festival-inspired landing page */
 html{scroll-padding-top:88px}
 body{background:var(--canopy);background-image:radial-gradient(ellipse at 50% 0,rgba(255,0,51,.10),transparent 42%)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("icons/icon128.png") center 35%/min(76vw,760px) no-repeat;filter:grayscale(1) brightness(1.6);opacity:.45;mix-blend-mode:screen}
 .top{position:sticky;height:76px;padding:0 clamp(18px,5vw,72px);justify-content:space-between;border-bottom:1px solid #292929}
 .top-nav{display:flex;align-items:center;gap:28px;color:var(--bark);font-size:14px;font-weight:600}
 .top-nav a:hover,footer a:hover{color:var(--mist)}
